@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Books</title>
+    <meta name="description" content="A list of books available in our library">
+    <meta name="keywords" content="Books, Library, Reading, Literature">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#books-table').DataTable();
+            function updateTime() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+                const formattedTime = now.toLocaleDateString('en-US', options);
+                document.getElementById('current-time').innerText = formattedTime;
+            }
+            setInterval(updateTime, 1000);
+            updateTime(); // initial call to set the time immediately
+        });
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        #username {
+            display: inline-block;
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .book-image {
+            width: 40px;
+            border-radius: 4px;
+        }
+
+        .container-fluid {
+            margin-top: 20px;
+        }
+
+        .btn {
+            margin: 5px;
+        }
+
+        table {
+            margin-top: 20px;
+        }
+
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        td {
+            background-color: #ffffff;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .table-hover tbody tr:hover td {
+            background-color: #e9ecef;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .quote {
+            font-size: 18px;
+            font-style: italic;
+            color: #555;
+            margin-top: 20px;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            background-color: #f1f1f1;
+        }
+
+        #current-time {
+            font-size: 16px;
+            font-weight: bold;
+            color: #007bff;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="~{menu :: menu}"></div>
+<div id="current-time"></div>
+<div class="container-fluid">
+    <a class="btn btn-success" id="new-book-button" th:href="@{/books/new}">Add Book</a>
+    <a class="btn btn-primary" th:href="@{/home}">Main Page</a>
+    <span id="username" th:text="${username}"></span>
+    <div style="height: 10px;"></div>
+
+    <div class="quote">
+        "A room without books is like a body without a soul." - Marcus Tullius Cicero
+    </div>
+
+    <table class="table table-hover table-bordered table-striped" id="books-table" aria-label="Book List">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Author</th>
+            <th scope="col">Description</th>
+            <th scope="col">Price</th>
+            <th scope="col">Page Count</th>
+            <th scope="col">Image</th>
+            <th scope="col">Operation</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${books}">
+            <td th:text="${book.id}"></td>
+            <td th:text="${book.name}"></td>
+            <td th:text="${book.author}"></td>
+            <td th:text="${book.description}"></td>
+            <td th:text="${book.price}"></td>
+            <td th:text="${book.pageCount}"></td>
+            <td><img class="book-image" th:src="@{'/files/' + ${book.image}}" alt="Book Image"></td>
+            <td>
+                <a class="btn btn-primary" th:href="@{/books/edit/{id}(id=${book.id})}">Edit</a>
+                <a class="btn btn-danger" onclick="return confirm('Are you sure to delete this book?');"
+                   th:href="@{/books/delete/{id}(id=${book.id})}">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

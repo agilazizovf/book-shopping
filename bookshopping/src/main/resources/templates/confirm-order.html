@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Confirming of Shopping</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 50px; /* Added space from the top */
+        }
+
+        .container {
+            max-width: 400px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #confirm-order-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="~{menu :: menu}"></div>
+<div class="container">
+    <h1>Confirming of Shopping</h1>
+    <form th:action="@{/confirm-order-process}" method="POST" th:object="${customer}" id="confirm-order-form">
+        <div class="form-group">
+            <label for="customer-name">Name:</label>
+            <input class="form-control" id="customer-name" th:field="*{name}"/>
+            <span class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+        </div>
+        <div class="form-group">
+            <label for="customer-address">Address:</label>
+            <input class="form-control" id="customer-address" th:field="*{address}"/>
+            <span class="error-message" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></span>
+        </div>
+        <div class="form-group">
+            <label for="customer-phone">Telephone:</label>
+            <input class="form-control" id="customer-phone" th:field="*{phone}"/>
+            <span class="error-message" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+        </div>
+        <div class="form-group">
+            <label for="customer-email">Email:</label>
+            <input class="form-control" id="customer-email" th:field="*{email}"/>
+            <span class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+        </div>
+        <div class="form-group">
+            <label for="order-note">Note:</label>
+            <input class="form-control" id="order-note" th:field="*{note}"/>
+            <span class="error-message" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></span>
+        </div>
+        <button class="btn btn-success" type="submit">Save Process</button>
+    </form>
+</div>
+
+<script>
+    const customerName = document.getElementById('customer-name');
+    const customerAddress = document.getElementById('customer-address');
+    const customerPhone = document.getElementById('customer-phone');
+    const orderNote = document.getElementById('order-note');
+    const customerEmail = document.getElementById('customer-email');
+
+
+
+    const order = {};
+    const basketBooksFromLocalStorage = localStorage.getItem('basketBooks');
+    if (basketBooksFromLocalStorage == null) {
+        localStorage.setItem('basketBooks', '[]');
+    } else  {
+        basketBooks = JSON.parse(basketBooksFromLocalStorage);
+    }
+    order.basketBooks = basketBooks;
+    order.customer = {};
+    function confirmOrder(){
+        order.customer.name = customerName.value;
+        order.customer.adress = customerAddress.value;
+        order.customer.phone= customerPhone.value;
+        order.customer.email = customerEmail.value;
+        order.note = orderNote.value;
+        console.log(order);
+        console.log(JSON.stringify(order));
+
+        const http = new XMLHttpRequest();
+        http.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                const response = this.responseText;
+                console.log(JSON.parse(response));
+                localStorage.setItem('basket', '[]');
+                window.location.href = 'order-confirmation-message';
+            }
+        };
+
+        http.open('POST', "/rest/orders", true);
+        http.setRequestHeader("Content-Type", "application/json");
+        let totalPrice = 0;
+        for (let i = 0; i < order.basketBooks.length; i++) {
+            totalPrice += order.basketBooks[i].book.price*order.basketBooks[i].count;
+        }
+        order.totalPrice = totalPrice;
+        http.send(JSON.stringify(order));
+    }
+</script>
+</body>
+</html>

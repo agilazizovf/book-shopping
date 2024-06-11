@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.tymeLeaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</head>
+<style>
+    #main-content {
+        overflow: auto;
+        padding: 10px;
+        background-color: white;
+    }
+    .book-container{
+        box-sizing: border-box;
+        padding: 10px;
+        width: 100%;
+        float: left;
+    }
+    .book{
+        box-sizing: border-box;
+        border: 3px solid black;
+        padding: 10px;
+        border-radius: 7px;
+
+    }
+    @media screen and (min-width: 300px) {
+        .book-container {
+            width: 50%;
+        }
+    }
+
+    @media screen and (min-width: 500px) {
+        .book-container {
+            width: 33.33%;
+        }
+    }
+    @media screen and (min-width: 700px) {
+        .book-container {
+            width: 25%;
+        }
+    }
+    @media screen and (min-width: 900px) {
+        .book-container {
+            width: 20%;
+        }
+    }
+    @media screen and (min-width: 1100px) {
+        .book-container {
+            width: 16.66%;
+        }
+    }
+    @media screen and (min-width: 1300px) {
+        .book-container {
+            width: 14.28%;
+        }
+    }
+    @media screen and (min-width: 1500px) {
+        .book-container {
+            width: 12.5%;
+        }
+    }
+    .book-image{
+        display: block;
+        width: 100%;
+        background-color: white;
+        height: 210px;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+    }
+    .book-name, .book-author, .book-description, .book-price, .book-page-count{
+        display: block;
+        white-space: nowrap;
+        text-overflow:ellipsis;
+        overflow: hidden;
+    }
+    .book-name::before{
+        content: "Name: ";
+        font-weight: bold;
+    }   .book-author::before{
+            content: "Author: ";
+            font-weight: bold;
+        }    .book-description::before{
+                 content: "Description: ";
+                 font-weight: bold;
+             }    .book-price::before{
+                      content: "Price: ";
+                      font-weight: bold;
+                  }    .book-page-count::before{
+                           content: "Page Count: ";
+                           font-weight: bold;
+                       }
+
+    .book-image{
+        width: 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+    }
+    #total-price {
+        font-size: 24px;
+    }
+    #open-basket-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        width: 140px;
+    }
+
+
+    .add-to-basket{
+        text-align: center;
+        margin-top: 5px;
+    }
+    #search-input{
+        position: fixed;
+        bottom: 70px;
+        right: 20px;
+        width: 140px;
+    }
+</style>
+<body>
+<!--HTML BEGIN-->
+<div th:replace="menu :: menu"></div>
+<div id="main-content">
+
+</div>
+
+ <button type="button" data-toggle="modal" data-target="#basketModal"
+         onclick="openBasket()" id='open-basket-btn' class='btn btn-primary'>Basket
+     <span class='badge badge-light' id="basket-book-count">0</span></button>
+<input id='search-input' class='form-control' placeholder='Search'>
+
+<div class="modal fade" id="basketModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Basket</h1>
+                <button class="close" data-dismiss="modal" type="button">x</button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Book Id</th>
+<!--                        <th>Book Image</th>-->
+                        <th>Book Name</th>
+                        <th>Book Price</th>
+                        <th>Book Count</th>
+                        <th>Book Total Price</th>
+                    </tr>
+                    </thead>
+                    <tbody id="basket-books-table">
+                    </tbody>
+
+                </table>
+                <span id="total-price"></span>
+            </div>
+            <div class="modal-footer">
+                <a th:href = '@{/confirm-order}' class="btn btn-success" onclick="confirmOrder()">Confirm process</a>
+                <button class="btn btn-danger" data-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--HTML END-->
+<script>
+    // JAVASCRIPT BEGIN
+    var xht = new XMLHttpRequest();
+    var booksArrayGlobal=[];
+    var basketBooks=[];
+    var basketBooksFromStorage = localStorage.getItem('basketBooks');
+    if (basketBooksFromStorage == null) {
+        localStorage.setItem('basketBooks', '[]');
+    }
+    else{
+        basketBooks = JSON.parse(basketBooksFromStorage);
+    }
+    var openBasketButton = document.getElementById('open-basket-btn');
+    var basketBookCount = document.getElementById('basket-book-count');
+    var basketBooksTable = document.getElementById('basket-books-table');
+    var totalPrice = document.getElementById('total-price');
+    basketBookCount.innerHTML = basketBooks.length;
+    xht.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            var responseJSON = this.responseText;
+            var booksArray = JSON.parse(responseJSON);
+            console.log(booksArray);
+            booksArrayGlobal = booksArray.slice();
+
+            var mainContent = document.getElementById('main-content');
+            var mainContentHTML = "";
+
+            for (var i = 0; i < booksArray.length; i++) {
+                var book = booksArray[i];
+                mainContentHTML += "<div class='book-container'>";
+                mainContentHTML += "<div class='book'>";
+                mainContentHTML += "<span class='book-image' style='background-image:url(files/" + book.image + ");'></span>";
+                mainContentHTML += "<span class='book-name' title='"+book.name+"'>"+book.name+"</span>";
+                mainContentHTML += "<span class='book-price' title='"+book.price+"'>"+book.price+"</span>";
+                mainContentHTML += "<span class='book-description' title='"+book.description+"'>"+book.description+"</span>";
+                mainContentHTML += "<span class='book-author' title='"+book.author+"'>"+book.author+"</span>";
+                mainContentHTML += "<span class='book-page-count' title='"+book.pageCount+"'>"+book.pageCount+"</span>";
+                mainContentHTML += "<div class='add-to-basket'><button "+"class='add-to-basket-btn btn btn-primary' onclick='addToBasket("+book.id+")'>" +
+                    "Add to basket</button></div>";
+                mainContentHTML += "</div></div>";
+            }
+            mainContent.innerHTML = mainContentHTML;
+        }
+    };
+    xht.open("GET", "/rest/books", true);
+    xht.send();
+
+    // Add to basket function beginning
+    function addToBasket(bookId) {
+        var bookExistsInBasket = false;
+        //alert(bookId);
+        for (var i=0; i<basketBooks.length; i++) {
+            var basketBook = basketBooks[i];
+            if (basketBook.book.id == bookId) {
+                basketBook.count++;
+                bookExistsInBasket = true;
+                break;
+            }
+        }
+            if (bookExistsInBasket){
+
+            }
+            else {
+                for (var i=0; i<booksArrayGlobal.length; i++){
+                    if (booksArrayGlobal[i].id == bookId) {
+                        var basketBook = {count:1, book:booksArrayGlobal[i]};
+                        basketBooks.push(basketBook);
+                        break;
+                    }
+                }
+            }
+
+
+        // alert(JSON.stringify(basketBooks));
+        openBasketButton.style.display = 'none';
+        basketBookCount.innerHTML = basketBooks.length;
+        localStorage.setItem('basketBooks', JSON.stringify(basketBooks));
+        setTimeout(function (){
+            openBasketButton.style.display = 'block';
+        }, 300);
+    }
+    function openBasket() {
+        fillBasketTable();
+    }
+
+    function deleteBasketBook(bookId) {
+        for (var i = 0; i < basketBooks.length; i++) {
+            if (basketBooks[i].book.id == bookId) {
+                basketBooks.splice(i, 1);
+                break;
+            }
+        }
+        localStorage.setItem('basketBooks', JSON.stringify(basketBooks));
+
+        openBasketButton.style.display = 'none';
+        basketBookCount.innerHTML = basketBooks.length;
+        setTimeout(function (){
+            openBasketButton.style.display = 'block';
+        }, 300);
+        fillBasketTable();
+    }
+
+    function fillBasketTable() {
+        var basketBooksTableHTML = "";
+        for (var i = 0; i < basketBooks.length; i++) {
+            var basketBook = basketBooks[i];
+            basketBooksTableHTML +="<tr><td>"+basketBook.book.id;
+            // basketBooksTableHTML +="<tr><td>"+"<img alt='' class='basket-book-image' " +
+            //     "src='/files/"+basketBook.book.image+"'/>";
+            basketBooksTableHTML +="</td><td>"+basketBook.book.name;
+            basketBooksTableHTML +="</td><td>"+basketBook.book.price;
+            basketBooksTableHTML +="</td><td><input "+
+                "oninput='bookCountChange("+basketBook.book.id+", this.value)' type='number' value='"+basketBook.count;
+            basketBooksTableHTML +="' /></td><td id='book"+basketBook.book.id+"'>"+(basketBook.book.price*basketBook.count);
+            basketBooksTableHTML +="</td><td><button onclick='deleteBasketBook("+basketBook.book.id+")'"+
+                " class='btn btn-danger'>X</button>";
+            basketBooksTableHTML +="</td></tr>";
+
+        }
+        basketBooksTable.innerHTML = basketBooksTableHTML;
+        calculateTotalPrice();
+    }
+
+    function bookCountChange(bookId, count) {
+        for (var i = 0; i < basketBooks.length; i++) {
+            var basketBook = basketBooks[i];
+            if (basketBook.book.id == bookId) {
+                basketBook.count = count;
+                document.getElementById('book'+basketBook.book.id)
+                    .innerHTML = (count * basketBook.book.price);
+                localStorage.setItem('basketBooks', JSON.stringify(basketBooks));
+                calculateTotalPrice();
+                break;
+            }
+        }
+    }
+    function calculateTotalPrice() {
+        var totalPriceNumber = 0;
+        for (var i = 0; i < basketBooks.length; i++) {
+            var basketBook = basketBooks[i];
+            totalPriceNumber += basketBook.count * basketBook.book.price;
+        }
+        totalPrice.innerHTML ='Total Price: '+totalPriceNumber +' AZN';
+    }
+    // Add to basket function ending
+
+    // JAVASCRIPT END
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Order Confirmation</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa; /* Light gray background */
+    }
+
+    .container {
+      max-width: 800px; /* Adjusted container max-width */
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #198754; /* Green color for header */
+      margin-bottom: 30px;
+    }
+
+    /* Button styles */
+    .btn-success {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #198754; /* Green background for success button */
+      border: none;
+      border-radius: 5px;
+      color: #fff; /* White text color */
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-success:hover {
+      background-color: #146c43; /* Darker green on hover */
+    }
+  </style>
+
+</head>
+<body>
+<div th:insert="~{menu :: menu}"></div>
+<div class="container">
+  <h1>Your shopping has been approved!</h1>
+
+  <a class="btn btn-success" th:href="@{/customer}">Continue to Shopping</a>
+
+</div>
+
+<script>
+
+  localStorage.clear()
+</script>
+</body>
+</html>
