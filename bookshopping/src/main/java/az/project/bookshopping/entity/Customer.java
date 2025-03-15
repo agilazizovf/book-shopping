@@ -22,8 +22,8 @@ public class Customer {
     @Column(columnDefinition = "VARCHAR(50)")
     private String name;
 
-    @NotEmpty(message = "Surname must not be empty")
-    @Size(min = 3, max = 200, message = "Surname must be between 3 and 200 characters")
+    @NotEmpty(message = "Address must not be empty")
+    @Size(min = 3, max = 200, message = "Address must be between 3 and 200 characters")
     @Column(columnDefinition = "VARCHAR(200)")
     private String address;
 

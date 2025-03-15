@@ -1,11 +1,10 @@
 package az.project.bookshopping.controller;
 
-
-
 import az.project.bookshopping.configuration.MySession;
 import az.project.bookshopping.entity.Book;
 import az.project.bookshopping.file.StorageService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -82,6 +81,8 @@ public class BookController {
         model.addAttribute("books",books);
         return "redirect:/books";
     }
+
+    // Selecting book by id
     @GetMapping(path = "/books/edit/{id}")
     public String editBook(@PathVariable(name = "id") Integer id, Model model){
         Optional<Book> bookOptional = BookDAO.findById(id);

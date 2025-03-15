@@ -10,12 +10,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import az.project.bookshopping.repository.UserRepository;
 
 @Controller
 public class UserController {
 
     @Autowired
-    private az.project.bookshopping.repository.UserRepository userDAO;
+    private UserRepository userDAO;
 
     private boolean userCreated=false;
 
